@@ -41,8 +41,8 @@ class DatasetConfig:
 
 class Dataset:
 
-    def _safe_load_config(self):
-        config_file_path = os.path.join(self.dataset_folder_path)
+    def _safe_load_config(self, config_file_name):
+        config_file_path = os.path.join(self.dataset_folder_path, config_file_name)
 
         if not os.path.isfile(config_file_path):
             raise FileNotFoundError(f'Config file not found at {config_file_path}')
@@ -50,10 +50,10 @@ class Dataset:
         config = load_yaml(config_file_path)
         self.config = DatasetConfig(**config)
 
-    def __init__(self, dataset_folder_path):
+    def __init__(self, dataset_folder_path, config_file_name='data.yaml'):
         self.dataset_folder_path = dataset_folder_path
         self.config = None
-        self._safe_load_config()
+        self._safe_load_config(config_file_name)
 
     def iterate_file_paths(self, part: DatasetPart):
         if not self.config[part]:
