@@ -15,12 +15,12 @@ class DatasetPart(Enum):
 
 @dataclass
 class DatasetConfig:
-    train: Optional[str]
-    val: Optional[str]
-    test: Optional[str]
-    data: Optional[str]
     nc: int
     names: List[str]
+    train: Optional[str] = ''
+    val: Optional[str] = ''
+    test: Optional[str] = ''
+    data: Optional[str] = ''
 
     def _at_least_one_path(self):
         return any([self.train, self.val, self.test, self.data])
