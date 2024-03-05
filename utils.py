@@ -11,3 +11,8 @@ def load_text(file_path):
     with open(file_path, 'r') as file:
         data = file.read()
     return data
+
+
+def read_lines(file_path):
+    with open(file_path, 'r') as file:
+        return file.readlines()

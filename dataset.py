@@ -1,7 +1,7 @@
 import os
 from dataclasses import dataclass
 from typing import List, Optional
-from utils import load_yaml, load_text
+from utils import load_yaml, load_text, read_lines
 from enum import Enum
 from PIL import Image
 
@@ -86,5 +86,26 @@ class Dataset:
 
         for image_file_path, label_file_path in self.iterate_file_paths(part):
             image = Image.open(image_file_path)
-            label = load_text(label_file_path)
+            label = LabeledBBox.from_yolov5_file(label_file_path)
             yield image, label
+
+
+@dataclass
+class LabeledBBox:
+    class_index: int
+    xn: float
+    yn: float
+    wn: float
+    hn: float
+
+    def to_yolov5_line(self):
+        return f'{self.class_index} {self.xn} {self.yn} {self.wn} {self.hn}'
+
+    @staticmethod
+    def from_yolov5_line(line):
+        class_index, x, y, w, h = line.split(' ')
+        return LabeledBBox(int(class_index), float(x), float(y), float(w), float(h))
+
+    @staticmethod
+    def from_yolov5_file(file_path):
+        return [LabeledBBox.from_yolov5_line(line) for line in read_lines(file_path)]
