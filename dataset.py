@@ -1,8 +1,9 @@
 import os
 from dataclasses import dataclass
 from typing import List, Optional
-from utils import load_yaml
+from utils import load_yaml, load_text
 from enum import Enum
+from PIL import Image
 
 
 class DatasetPart(Enum):
@@ -54,6 +55,36 @@ class Dataset:
         self.config = None
         self._safe_load_config()
 
+    def iterate_file_paths(self, part: DatasetPart):
+        if not self.config[part]:
+            raise ValueError(f'No path provided for {part}')
+
+        image_folder_path = os.path.join(self.dataset_folder_path, self.config[part])
+        if not os.path.isdir(image_folder_path):
+            raise FileNotFoundError(f'Image folder not found at {image_folder_path}')
+
+        label_folder_path = image_folder_path.replace('images', 'labels')
+        if not os.path.isdir(label_folder_path):
+            raise FileNotFoundError(f'Label folder not found at {label_folder_path}')
+
+        image_file_names = sorted(os.listdir(image_folder_path))
+        for image_file_name in image_file_names:
+            image_file_path = os.path.join(image_folder_path, image_file_name)
+            label_file_path = os.path.join(label_folder_path, image_file_name)
+            if not os.path.isfile(label_file_path):
+                continue
+
+            yield image_file_path, label_file_path
+
     def iterate(self, part: DatasetPart):
         if not self.config[part]:
             raise ValueError(f'No path provided for {part}')
+
+    def lazy_iterate(self, part: DatasetPart):
+        if not self.config[part]:
+            raise ValueError(f'No path provided for {part}')
+
+        for image_file_path, label_file_path in self.iterate_file_paths(part):
+            image = Image.open(image_file_path)
+            label = load_text(label_file_path)
+            yield image, label
