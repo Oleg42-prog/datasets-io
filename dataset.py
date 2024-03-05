@@ -1,9 +1,11 @@
 import os
-from dataclasses import dataclass, asdict
 from typing import List, Optional
-from utils import load_yaml, load_text, read_lines, change_file_name_extension
+from dataclasses import dataclass, asdict
 from enum import Enum
+
 from PIL import Image
+
+from utils import load_yaml, read_lines, change_file_name_extension
 
 
 class DatasetPart(Enum):
