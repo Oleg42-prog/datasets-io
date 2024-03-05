@@ -80,6 +80,8 @@ class Dataset:
         if not self.config[part]:
             raise ValueError(f'No path provided for {part}')
 
+        raise NotImplementedError('This method is not implemented yet')
+
     def lazy_iterate(self, part: DatasetPart):
         if not self.config[part]:
             raise ValueError(f'No path provided for {part}')
