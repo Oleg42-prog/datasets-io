@@ -9,6 +9,7 @@ def convert_bbox_xywhn_to_xywh(bbox, original_image_size):
     y *= original_image_size[1]
     w *= original_image_size[0]
     h *= original_image_size[1]
+
     return x, y, w, h
 
 
