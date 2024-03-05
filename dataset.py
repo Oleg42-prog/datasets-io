@@ -1,7 +1,7 @@
 import os
 from dataclasses import dataclass, asdict
 from typing import List, Optional
-from utils import load_yaml, load_text, read_lines
+from utils import load_yaml, load_text, read_lines, change_file_name_extension
 from enum import Enum
 from PIL import Image
 
@@ -70,6 +70,7 @@ class Dataset:
 
     def iterate_file_paths(self, part: DatasetPart, skip_missing_labels=True):
         part_path = self._get_part_path(part)
+
         image_folder_path = os.path.join(self.dataset_folder_path, part_path)
         if not os.path.isdir(image_folder_path):
             raise FileNotFoundError(f'Image folder not found at {image_folder_path}')
@@ -80,8 +81,10 @@ class Dataset:
 
         image_file_names = sorted(os.listdir(image_folder_path))
         for image_file_name in image_file_names:
+            label_file_name = change_file_name_extension(image_file_name, '.txt')
+
             image_file_path = os.path.join(image_folder_path, image_file_name)
-            label_file_path = os.path.join(label_folder_path, image_file_name)
+            label_file_path = os.path.join(label_folder_path, label_file_name)
 
             if skip_missing_labels and not os.path.isfile(label_file_path):
                 continue
