@@ -58,10 +58,12 @@ class Dataset:
 
     def _get_part_path(self, part: DatasetPart):
         part_path = self.config_dict[part.value]
+        full_part_path = os.path.join(self.dataset_folder_path, part_path)
+
         if not part_path:
             raise ValueError(f'No path provided for {part_path}')
 
-        if not os.path.isdir(part_path):
+        if not os.path.isdir(full_part_path):
             raise FileNotFoundError(f'Part folder not found at {part_path}')
 
         return part_path
