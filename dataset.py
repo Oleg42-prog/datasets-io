@@ -96,9 +96,10 @@ class Dataset:
 
     def lazy_iterate(self, part: DatasetPart):
         for image_file_path, label_file_path in self.iterate_file_paths(part):
+            image_file_name = os.path.basename(image_file_path)
             image = Image.open(image_file_path)
             label = LabeledBBox.from_yolov5_file(label_file_path)
-            yield image, label
+            yield image_file_name, image, label
 
 
 @dataclass
