@@ -1,44 +1,11 @@
 import os
-from typing import List, Optional
-from dataclasses import dataclass, asdict
-from enum import Enum
+from dataclasses import asdict
 
 from PIL import Image
 
-from utils import load_yaml, read_lines, change_file_name_extension
-
-
-class DatasetPart(Enum):
-    TRAIN = 'train'
-    VAL = 'val'
-    TEST = 'test'
-    DATA = 'data'
-
-
-@dataclass
-class DatasetConfig:
-    nc: int
-    names: List[str]
-    train: Optional[str] = ''
-    val: Optional[str] = ''
-    test: Optional[str] = ''
-    data: Optional[str] = ''
-
-    def _at_least_one_path(self):
-        return any([self.train, self.val, self.test, self.data])
-
-    def _class_numbers_consistent(self):
-        return self.nc == len(self.names)
-
-    def __post_init__(self):
-        if not self._at_least_one_path():
-            raise ValueError('At least one path must be provided in the config file')
-
-        if not self.names:
-            raise ValueError('Class names must be provided in the config file')
-
-        if not self._class_numbers_consistent():
-            raise ValueError('Number of class names must match the number of classes')
+from utils import load_yaml, change_file_name_extension
+from dataset_io.dataset_config import DatasetConfig, DatasetPart
+from dataset_io.labeled_bbox import LabeledBBox
 
 
 class Dataset:
@@ -102,28 +69,3 @@ class Dataset:
             image = Image.open(image_file_path)
             label = LabeledBBox.from_yolov5_file(label_file_path)
             yield image_file_name, image, label
-
-
-@dataclass
-class LabeledBBox:
-    class_index: int
-    xn: float
-    yn: float
-    wn: float
-    hn: float
-
-    def to_yolov5_line(self):
-        return f'{self.class_index} {self.xn} {self.yn} {self.wn} {self.hn}'
-
-    @staticmethod
-    def from_yolov5_line(line):
-        class_index, x, y, w, h = line.split(' ')
-        class_index = int(class_index)
-        x, y, w, h = float(x), float(y), float(w), float(h)
-        x -= w / 2
-        y -= h / 2
-        return LabeledBBox(class_index, x, y, w, h)
-
-    @staticmethod
-    def from_yolov5_file(file_path):
-        return [LabeledBBox.from_yolov5_line(line) for line in read_lines(file_path)]
