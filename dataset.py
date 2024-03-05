@@ -1,5 +1,5 @@
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 from typing import List, Optional
 from utils import load_yaml, load_text, read_lines
 from enum import Enum
@@ -49,17 +49,26 @@ class Dataset:
 
         config = load_yaml(config_file_path)
         self.config = DatasetConfig(**config)
+        self.config_dict = asdict(self.config)
 
     def __init__(self, dataset_folder_path, config_file_name='data.yaml'):
         self.dataset_folder_path = dataset_folder_path
         self.config = None
         self._safe_load_config(config_file_name)
 
-    def iterate_file_paths(self, part: DatasetPart):
-        if not self.config[part]:
-            raise ValueError(f'No path provided for {part}')
+    def _get_part_path(self, part: DatasetPart):
+        part_path = self.config_dict[part.value]
+        if not part_path:
+            raise ValueError(f'No path provided for {part_path}')
 
-        image_folder_path = os.path.join(self.dataset_folder_path, self.config[part])
+        if not os.path.isdir(part_path):
+            raise FileNotFoundError(f'Part folder not found at {part_path}')
+
+        return part_path
+
+    def iterate_file_paths(self, part: DatasetPart):
+        part_path = self._get_part_path(part)
+        image_folder_path = os.path.join(self.dataset_folder_path, part_path)
         if not os.path.isdir(image_folder_path):
             raise FileNotFoundError(f'Image folder not found at {image_folder_path}')
 
@@ -77,15 +86,9 @@ class Dataset:
             yield image_file_path, label_file_path
 
     def iterate(self, part: DatasetPart):
-        if not self.config[part]:
-            raise ValueError(f'No path provided for {part}')
-
         raise NotImplementedError('This method is not implemented yet')
 
     def lazy_iterate(self, part: DatasetPart):
-        if not self.config[part]:
-            raise ValueError(f'No path provided for {part}')
-
         for image_file_path, label_file_path in self.iterate_file_paths(part):
             image = Image.open(image_file_path)
             label = LabeledBBox.from_yolov5_file(label_file_path)
