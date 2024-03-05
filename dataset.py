@@ -115,7 +115,11 @@ class LabeledBBox:
     @staticmethod
     def from_yolov5_line(line):
         class_index, x, y, w, h = line.split(' ')
-        return LabeledBBox(int(class_index), float(x), float(y), float(w), float(h))
+        class_index = int(class_index)
+        x, y, w, h = float(x), float(y), float(w), float(h)
+        x -= w / 2
+        y -= h / 2
+        return LabeledBBox(class_index, x, y, w, h)
 
     @staticmethod
     def from_yolov5_file(file_path):
